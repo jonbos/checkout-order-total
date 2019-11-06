@@ -1,4 +1,4 @@
-from src.item import ByEachItem, ByWeightItem
+from src.item import Item
 
 class Transaction:
     def __init__(self, price_db=None, markdown_db=None):
@@ -15,14 +15,14 @@ class Transaction:
         item_price = self.price_db[item_name]
         if args:
             weight = args[0]
-            item = ByWeightItem(item_name, item_price, weight)
+            item = Item(item_name, item_price, weight)
         else:
-            item = ByEachItem(item_name, item_price)
+            item = Item(item_name, item_price)
         self.items.append(item)
 
     @property
     def total(self):
         total = 0
         for item in self.items:
-            total += item.price - (self.markdown_db.get(item.name, 0) * item.__dict__.get('qty', 1))
+            total += item.price - ((self.markdown_db.get(item.name, 0) * item.units))
         return total
