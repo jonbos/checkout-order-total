@@ -1,5 +1,6 @@
 from src.item import Item
 
+
 class Transaction:
     def __init__(self, price_db=None, markdown_db=None):
         if markdown_db is None:
@@ -24,5 +25,11 @@ class Transaction:
     def total(self):
         total = 0
         for item in self.items:
-            total += item.price - ((self.markdown_db.get(item.name, 0) * item.units))
+            total += item.price - self.get_discount_amount(item)
         return total
+
+    def get_discount_amount(self, item):
+        if item.name in self.markdown_db:
+            return self.markdown_db[item.name].markdown_amount * item.units
+        else:
+            return 0

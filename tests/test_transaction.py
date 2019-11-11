@@ -1,9 +1,16 @@
 import pytest
 
 from src.item import Item
+from src.markdown import Markdown
 from src.transaction import Transaction
 
 MARKDOWNS = {'14oz soup': .20, '80% ground beef': .50}
+
+
+@pytest.fixture
+def get_markdown_db():
+    markdowns = [Markdown('14oz soup', .2), Markdown('80% ground beef', .50)]
+    return {markdown.item_name: markdown for markdown in markdowns}
 
 @pytest.fixture
 def get_test_db():
@@ -14,7 +21,6 @@ def get_transaction_with_test_db(get_test_db):
     return Transaction(get_test_db)
 
 class TestWiring:
-
     def test_a_new_transaction_has_zero_total(self):
         trans = Transaction()
         assert trans.total == 0
@@ -67,14 +73,15 @@ class TestByWeightItemScanning:
 
 
 class TestSpecialPricing:
-    def test_should_reduce_cost_by_markdown_amount(self, get_test_db):
-        trans = Transaction(get_test_db, MARKDOWNS)
+    def test_should_reduce_cost_by_markdown_amount(self, get_test_db, get_markdown_db):
+        trans = Transaction(get_test_db, get_markdown_db)
+
         trans.scan('14oz soup')
+
         assert trans.total == 1.69
 
-    def test_should_reduce_cost_by_markdown_amount_for_by_weight_items(self, get_test_db):
-        trans = Transaction(get_test_db, MARKDOWNS)
-
+    def test_should_reduce_cost_by_markdown_amount_for_by_weight_items(self, get_test_db, get_markdown_db):
+        trans = Transaction(get_test_db, get_markdown_db)
+        print(get_markdown_db)
         trans.scan('80% ground beef', 2)
-
         assert trans.total == 10.98
