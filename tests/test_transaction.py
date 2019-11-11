@@ -1,5 +1,6 @@
 import pytest
 
+from src.bulk_special import BulkSpecial
 from src.item import Item
 from src.markdown import Markdown
 from src.transaction import Transaction
@@ -9,9 +10,11 @@ from src.transaction import Transaction
 def get_test_db():
     return {"14oz soup": 1.89, '80% ground beef': 5.99, 'Bananas': 2.38, 't-bone steak': 9.99}
 
+
 @pytest.fixture
 def get_transaction_with_test_db(get_test_db):
     return Transaction(get_test_db)
+
 
 class TestWiring:
     def test_a_new_transaction_has_zero_total(self):
@@ -56,6 +59,7 @@ class TestScanningIndividualItems:
         trans.scan('t-bone steak')
         assert trans.total == price_db['14oz soup'] + price_db['t-bone steak']
 
+
 class TestByWeightItemScanning:
     def test_can_scan_item_with_weight(self, get_transaction_with_test_db, get_test_db):
         trans = get_transaction_with_test_db
@@ -84,3 +88,14 @@ class TestMarkdownPricing:
         trans.scan('80% ground beef', 2)
 
         assert trans.total == 10.98
+
+
+class TestBulkPricing:
+    def test_should_return_correct_total_for_buy_one_get_one_free(self, get_test_db):
+        bulk_specials = {'14oz soup': BulkSpecial('14oz soup', 1, 1, 100)}
+        trans = Transaction(get_test_db, bulk_db=bulk_specials)
+
+        trans.scan('14oz soup')
+        trans.scan('14oz soup')
+
+        assert trans.total == 1.89
