@@ -1,6 +1,7 @@
 import pytest
 
 from src.item import Item
+from src.markdown_special import MarkdownSpecial
 from src.transaction import Transaction
 
 
@@ -29,6 +30,11 @@ class TestWiring:
         trans = Transaction(get_test_db)
         assert trans.price_db == get_test_db
 
+    def test_can_add_special_to_transaction(self, get_test_db):
+        special = MarkdownSpecial('14oz soup', 1.69)
+        trans = Transaction(get_test_db)
+        trans.add_special(special)
+        assert trans.specials_db == {'14oz soup': [special]}
 
 class TestScanningIndividualItems:
     def test_can_scan_item(self, get_test_db):
