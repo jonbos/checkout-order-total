@@ -25,10 +25,10 @@ class Transaction:
     def total(self):
         total = 0
         for item in self.items:
-            total += item.price - self.get_discount_amount(item)
+            total += item.price - self.get_markdown_amount(item)
         return total
 
-    def get_discount_amount(self, item):
+    def get_markdown_amount(self, item):
         if item.name in self.markdown_db:
             return self.markdown_db[item.name].markdown_amount * item.units
         else:
