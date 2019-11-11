@@ -4,18 +4,15 @@ from src.item import Item
 
 
 class Transaction:
-    def __init__(self, price_db=None, markdown_db=None, bulk_db=None):
-        if markdown_db is None:
-            markdown_db = {}
+    def __init__(self, price_db=None, specials_db=None):
+        if specials_db is None:
+            specials_db = {}
         if price_db is None:
             price_db = {}
-        if bulk_db is None:
-            bulk_db = {}
 
         self.items = []
         self.price_db = price_db
-        self.markdown_db = markdown_db
-        self.bulk_db = bulk_db
+        self.specials_db = specials_db
 
     def scan(self, item_name, *args):
         item_price = self.price_db[item_name]
@@ -28,17 +25,18 @@ class Transaction:
 
     @property
     def total(self):
-        total = 0
-        for item in self.items:
-            total += item.price - self.get_markdown_amount(item)
-        bulk_discount = self.calculate_bulk_discount_amount(self.items)
-        return total - bulk_discount
+        item_total = sum([item.price_per_unit * item.units for item in self.items])
+        discount_amount = self.calculate_discounts()
+        return item_total - discount_amount
 
-    def get_markdown_amount(self, item):
-        if item.name in self.markdown_db:
-            return self.markdown_db[item.name].markdown_amount * item.units
-        else:
-            return 0
+    def calculate_discounts(self):
+        discount_amount = 0
+        for item_name, list_items in groupby(self.items, lambda item: item.name):
+            if item_name in self.specials_db:
+                for discount in self.specials_db[item_name]:
+                    discount_amount += discount.calculate_discount_amount(list(list_items))
+
+        return discount_amount
 
     def calculate_bulk_discount_amount(self, items):
         discount_amount = 0
