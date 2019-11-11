@@ -2,6 +2,8 @@ import pytest
 
 from src.markdown_special import MarkdownSpecial
 from src.transaction import Transaction
+# noinspection PyUnresolvedReferences
+from .test_transaction import get_test_db
 
 
 class TestMarkdownPricing:
