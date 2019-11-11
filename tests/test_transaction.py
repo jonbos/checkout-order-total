@@ -2,7 +2,7 @@ import pytest
 
 from src.bulk_special import BulkSpecial
 from src.item import Item
-from src.markdown import Markdown
+from src.markdown_special import MarkdownSpecial
 from src.transaction import Transaction
 
 
@@ -72,7 +72,8 @@ class TestByWeightItemScanning:
 class TestMarkdownPricing:
     @pytest.fixture
     def get_markdown_special_db(self):
-        return {'14oz soup': [Markdown('14oz soup', .2)], '80% ground beef': [Markdown('80% ground beef', .50)]}
+        return {'14oz soup': [MarkdownSpecial('14oz soup', .2)],
+                '80% ground beef': [MarkdownSpecial('80% ground beef', .50)]}
 
     def test_should_reduce_cost_by_markdown_amount(self, get_test_db, get_markdown_special_db):
         trans = Transaction(price_db=get_test_db, specials_db=get_markdown_special_db)
@@ -89,7 +90,6 @@ class TestMarkdownPricing:
         assert trans.total == 10.98
 
 
-@pytest.mark.skip
 class TestBulkPricing:
     def test_should_return_correct_total_for_buy_one_get_one_free(self, get_test_db):
         bulk_specials = {'14oz soup': BulkSpecial('14oz soup', 1, 1, 100)}
