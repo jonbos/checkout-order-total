@@ -10,5 +10,6 @@ class BulkSpecial(Special):
 
     def calculate_discount_amount(self, items):
         num_units = sum(item.units for item in items)
-        if num_units >= self.purchase_amount + self.discount_amount:
-            return items[0].price_per_unit
+        num_discounts = num_units // (self.purchase_amount + self.discount_amount)
+        item_price = items[0].price_per_unit
+        return (item_price * self.percent_discount / 100) * num_discounts * self.discount_amount
