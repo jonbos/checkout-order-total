@@ -1,5 +1,6 @@
 import pytest
 
+from item import Item
 from src.markdown_special import MarkdownSpecial
 from src.transaction import Transaction
 # noinspection PyUnresolvedReferences
@@ -25,3 +26,9 @@ class TestMarkdownPricing:
         trans.scan('80% ground beef', 2)
 
         assert trans.total == 10.98
+
+    def test_markdown_with_limit(self):
+        one_dollar_item = Item('one dollar item', 1)
+        items = [one_dollar_item] * 3
+        markdown = MarkdownSpecial('one dollar item', .2, limit=2)
+        assert markdown.calculate_discount_amount(items) == .40

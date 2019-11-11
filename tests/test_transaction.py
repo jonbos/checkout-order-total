@@ -8,11 +8,9 @@ from src.transaction import Transaction
 def get_test_db():
     return {"14oz soup": 1.89, '80% ground beef': 5.99, 'Bananas': 2.38, 't-bone steak': 9.99}
 
-
 @pytest.fixture
 def get_transaction_with_test_db(get_test_db):
     return Transaction(get_test_db)
-
 
 class TestWiring:
     def test_a_new_transaction_has_zero_total(self):

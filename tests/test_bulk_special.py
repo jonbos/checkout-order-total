@@ -37,3 +37,9 @@ def test_buy_two_get_one_half_off():
     items = [one_dollar_item] * 3
     discount_amount = buy_two_get_one_half_off_one_dollar_item.calculate_discount_amount(items)
     assert discount_amount == .5
+
+
+def test_buy_two_get_one_free_limit_six():
+    items = [one_dollar_item] * 10
+    discount = BulkSpecial('one_dollar_item', 2, 1, 100, limit=6)
+    assert discount.calculate_discount_amount(items) == 2
