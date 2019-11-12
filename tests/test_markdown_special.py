@@ -2,33 +2,86 @@ import pytest
 
 from item import Item
 from src.markdown_special import MarkdownSpecial
-from src.transaction import Transaction
-# noinspection PyUnresolvedReferences
-from .test_transaction import get_test_db
 
 
-class TestMarkdownPricing:
+@pytest.fixture
+def get_item_list_with_single_one_dollar_item():
+    return [Item('one dollar item', 1)]
+
+
+@pytest.fixture
+def get_item_list_with_two_units_single_one_dollar_item():
+    return [Item('one dollar item', 1, 2)]
+
+
+class TestUnlimitedMarkdownPricing:
+
+    def test_should_calculate_price_less_markdown_for_single_item(self, get_item_list_with_single_one_dollar_item):
+        items = get_item_list_with_single_one_dollar_item
+        ten_percent_markdown = MarkdownSpecial('one dollar item', .1)
+
+        discount_amt = ten_percent_markdown.calculate_discount_amount(items)
+
+        assert discount_amt == .1
+
+    def test_should_calculate_markdown_cost_for_multiple_items(self, get_item_list_with_single_one_dollar_item):
+        items = get_item_list_with_single_one_dollar_item * 5
+        ten_percent_markdown = MarkdownSpecial('one dollar item', .1)
+
+        discount_amt = ten_percent_markdown.calculate_discount_amount(items)
+
+        assert discount_amt == .5
+
+    def test_should_calculate_markdown_amount_for_multiple_by_weight_items(self,
+                                                                           get_item_list_with_two_units_single_one_dollar_item):
+        items = get_item_list_with_two_units_single_one_dollar_item * 2
+        ten_percent_markdown = MarkdownSpecial('one dollar per pound item', .1)
+
+        discount_amt = ten_percent_markdown.calculate_discount_amount(items)
+
+        assert discount_amt == .4
+
+    def test_should_calculate_markdown_amount_for_single_by_weight_items(self,
+                                                                         get_item_list_with_two_units_single_one_dollar_item):
+        items = get_item_list_with_two_units_single_one_dollar_item
+        ten_percent_markdown = MarkdownSpecial('one dollar per pound item', .1)
+
+        discount_amt = ten_percent_markdown.calculate_discount_amount(items)
+
+        assert discount_amt == .2
+
+
+class TestMarkdownWithLimit:
     @pytest.fixture
-    def get_markdown_special_db(self):
-        return {'14oz soup': [MarkdownSpecial('14oz soup', .2)],
-                '80% ground beef': [MarkdownSpecial('80% ground beef', .50)]}
+    def get_ten_cent_markdown_limit_2(self):
+        return MarkdownSpecial('one dollar item', .1, 2)
 
-    def test_should_reduce_cost_by_markdown_amount(self, get_test_db, get_markdown_special_db):
-        trans = Transaction(price_db=get_test_db, specials_db=get_markdown_special_db)
+    def test_should_calculate_discount_amount_when_num_of_items_equals_limit(self,
+                                                                             get_item_list_with_single_one_dollar_item,
+                                                                             get_ten_cent_markdown_limit_2):
+        items = get_item_list_with_single_one_dollar_item * 2
+        markdown = get_ten_cent_markdown_limit_2
 
-        trans.scan('14oz soup')
+        discount_amt = markdown.calculate_discount_amount(items)
 
-        assert trans.total == 1.69
+        assert discount_amt == .2
 
-    def test_should_reduce_cost_by_markdown_amount_for_by_weight_items(self, get_test_db, get_markdown_special_db):
-        trans = Transaction(get_test_db, get_markdown_special_db)
-        print(get_markdown_special_db)
-        trans.scan('80% ground beef', 2)
+    def test_should_calculate_discount_amount_when_num_of_items_exceeds_limit(self,
+                                                                              get_item_list_with_single_one_dollar_item,
+                                                                              get_ten_cent_markdown_limit_2):
+        items = get_item_list_with_single_one_dollar_item * 3
+        markdown = get_ten_cent_markdown_limit_2
 
-        assert trans.total == 10.98
+        discount_amt = markdown.calculate_discount_amount(items)
 
-    def test_markdown_with_limit(self):
-        one_dollar_item = Item('one dollar item', 1)
-        items = [one_dollar_item] * 3
-        markdown = MarkdownSpecial('one dollar item', .2, limit=2)
-        assert markdown.calculate_discount_amount(items) == .40
+        assert discount_amt == .2
+
+    def test_should_calculate_discount_amount_when_num_of_items_exceeds_limit_weighted_items(self,
+                                                                                             get_item_list_with_two_units_single_one_dollar_item,
+                                                                                             get_ten_cent_markdown_limit_2):
+        items = get_item_list_with_two_units_single_one_dollar_item * 2
+        markdown = get_ten_cent_markdown_limit_2
+
+        discount_amt = markdown.calculate_discount_amount(items)
+
+        assert discount_amt == .2
