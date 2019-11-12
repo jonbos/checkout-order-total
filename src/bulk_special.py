@@ -7,11 +7,9 @@ class BulkSpecial(Special):
         self.purchase_amount = purchase_amount
         self.discount_amount = discount_amount
         self.percent_discount = percent_discount
-        self.limit = limit
 
     def calculate_discount_amount(self, items):
         if self.limit:
-            print('shrinking item list')
             items = items[:self.limit]
 
         num_units = sum(item.units for item in items)

@@ -1,8 +1,7 @@
 from special import Special
 
-
 class NforXSpecial(Special):
-    def __init__(self, item_name, special_num, special_price, limit=None):
+    def __init__(self, item_name, special_num, special_price, limit=False):
         super(NforXSpecial, self).__init__(item_name=item_name)
         self.special_num = special_num
         self.special_price = special_price
