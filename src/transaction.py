@@ -32,20 +32,25 @@ class Transaction:
 
     @property
     def total(self):
-        item_total = sum([item.price_per_unit * item.units for item in self.items])
+        item_total = self.get_pre_discount_transaction_total()
         discount_amount = self.calculate_transaction_discounts()
         return item_total - discount_amount
 
+    def get_pre_discount_transaction_total(self):
+        return sum([item.price_per_unit * item.units for item in self.items])
+
     def calculate_transaction_discounts(self):
         discount_amount = 0
-        for item_name, list_items in groupby(self.items, lambda item: item.name):
-            if item_name in self.specials_db:
-                discount_amount += self.calculate_item_discounts(item_name, list_items)
+        for item_name, items in groupby(self.items, lambda item: item.name):
+            discount_amount += self.calculate_item_discounts(item_name, list(items))
         return discount_amount
 
-    def calculate_item_discounts(self, item_name, list_items):
+    def calculate_item_discounts(self, item_name, item_list):
         discount_amount = 0
-        item_discount_list = self.specials_db[item_name]
+        item_discount_list = self.get_item_discounts(item_name)
         for discount in item_discount_list:
-            discount_amount += discount.calculate_discount_amount(list(list_items))
+            discount_amount += discount.calculate_discount_amount(item_list)
         return discount_amount
+
+    def get_item_discounts(self, item_name):
+        return self.specials_db.get(item_name, [])
